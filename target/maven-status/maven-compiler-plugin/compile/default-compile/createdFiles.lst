@@ -1,0 +1,17 @@
+ar\edu\utn\dds\k3003\app\Fachada.class
+ar\edu\utn\dds\k3003\app\Fuente.class
+ar\edu\utn\dds\k3003\app\PdI.class
+ar\edu\utn\dds\k3003\repository\JpaFuenteRepository.class
+ar\edu\utn\dds\k3003\app\Hecho.class
+ar\edu\utn\dds\k3003\app\Fachada$1.class
+ar\edu\utn\dds\k3003\model\SomeDomainObject.class
+ar\edu\utn\dds\k3003\Application.class
+ar\edu\utn\dds\k3003\app\Todos.class
+ar\edu\utn\dds\k3003\app\ConsensoRequest.class
+ar\edu\utn\dds\k3003\app\Coleccion.class
+ar\edu\utn\dds\k3003\repository\InMemoryFuenteRepository.class
+ar\edu\utn\dds\k3003\controllers\AgregadorController.class
+ar\edu\utn\dds\k3003\model\exceptions\SomeDomainException.class
+ar\edu\utn\dds\k3003\repository\FuenteRepository.class
+ar\edu\utn\dds\k3003\app\Consenso.class
+ar\edu\utn\dds\k3003\app\AlMenosDos.class
