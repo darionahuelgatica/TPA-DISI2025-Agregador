@@ -1,12 +1,15 @@
 package ar.edu.utn.dds.k3003.app;
 
+import ar.edu.utn.dds.k3003.consenso.AlMenosDos;
+import ar.edu.utn.dds.k3003.consenso.Consenso;
+import ar.edu.utn.dds.k3003.consenso.Todos;
 import ar.edu.utn.dds.k3003.facades.FachadaAgregador;
 import ar.edu.utn.dds.k3003.facades.FachadaFuente;
 import ar.edu.utn.dds.k3003.facades.dtos.ConsensosEnum;
 import ar.edu.utn.dds.k3003.facades.dtos.FuenteDTO;
 import ar.edu.utn.dds.k3003.facades.dtos.HechoDTO;
+import ar.edu.utn.dds.k3003.model.Fuente;
 import ar.edu.utn.dds.k3003.repository.FuenteRepository;
-import ar.edu.utn.dds.k3003.repository.InMemoryFuenteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,16 +19,22 @@ import java.util.stream.Collectors;
 @Service
 public class Fachada implements FachadaAgregador {
 
-    private FuenteRepository fuenteRepository;
-    private Consenso consenso;
+    private final FuenteRepository fuenteRepository;
     private final Map<String, FachadaFuente> fachadasExternas = new HashMap<>();
+    private Consenso consenso;
 
     @Autowired
-    public Fachada (/*FachadaFuente fachadaFuente*/) {
-        this.fuenteRepository = new InMemoryFuenteRepository();
+    public Fachada(FuenteRepository fuenteRepository) {
+        this.fuenteRepository = fuenteRepository;
         this.consenso = new Todos();
-        //this.fachadaFuente = fachadaFuente;
     }
+
+//    //@Autowired
+//    public Fachada (/*FachadaFuente fachadaFuente*/) {
+//        this.fuenteRepository = new InMemoryFuenteRepository();
+//        this.consenso = new Todos();
+//        //this.fachadaFuente = fachadaFuente;
+//    }
 
     @Override
     public FuenteDTO agregar(FuenteDTO fuenteDTO) {
@@ -37,7 +46,6 @@ public class Fachada implements FachadaAgregador {
         fuenteRepository.save(fuente);
         return new FuenteDTO(id, fuenteDTO.nombre(), fuenteDTO.endpoint());
     }
-
 
     @Override
     public List<FuenteDTO> fuentes() {
