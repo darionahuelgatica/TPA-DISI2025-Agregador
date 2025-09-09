@@ -1,5 +1,6 @@
 package ar.edu.utn.dds.k3003.app;
 
+import ar.edu.utn.dds.k3003.client.FuenteProxyFactory;
 import ar.edu.utn.dds.k3003.consenso.AlMenosDos;
 import ar.edu.utn.dds.k3003.consenso.Consenso;
 import ar.edu.utn.dds.k3003.consenso.Todos;
@@ -14,35 +15,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
 public class Fachada implements FachadaAgregador {
 
     private final FuenteRepository fuenteRepository;
-    private final Map<String, FachadaFuente> fachadasExternas = new HashMap<>();
+    private final FuenteProxyFactory fuenteProxyFactory;
     private Consenso consenso;
 
     @Autowired
-    public Fachada(FuenteRepository fuenteRepository) {
+    public Fachada(FuenteRepository fuenteRepository, FuenteProxyFactory fuenteProxyFactory) {
         this.fuenteRepository = fuenteRepository;
+        this.fuenteProxyFactory = fuenteProxyFactory;
         this.consenso = new Todos();
     }
-
-//    //@Autowired
-//    public Fachada (/*FachadaFuente fachadaFuente*/) {
-//        this.fuenteRepository = new InMemoryFuenteRepository();
-//        this.consenso = new Todos();
-//        //this.fachadaFuente = fachadaFuente;
-//    }
 
     @Override
     public FuenteDTO agregar(FuenteDTO fuenteDTO) {
         String id = fuenteDTO.id() == null || fuenteDTO.id().isBlank()
             ? UUID.randomUUID().toString()
             : fuenteDTO.id();
+
+        if (!Pattern.matches("^(https?://).+", fuenteDTO.endpoint())) {
+            throw new IllegalArgumentException("El endpoint no es una URL válida");
+        }
+
         Fuente fuente = new Fuente(id, fuenteDTO.nombre(), fuenteDTO.endpoint());
-        //fuente.setFachadaExterna(this.fachadaFuente);
         fuenteRepository.save(fuente);
         return new FuenteDTO(id, fuenteDTO.nombre(), fuenteDTO.endpoint());
     }
@@ -61,30 +61,19 @@ public class Fachada implements FachadaAgregador {
     }
 
     @Override
-    public List<HechoDTO> hechos(String s) throws NoSuchElementException {
+    public List<HechoDTO> hechos(String coleccion) throws NoSuchElementException {
         List<Fuente> fuentes = this.fuenteRepository.findAll();
-        //List<List<HechoDTO>> hechosPorFuente = fuentes.stream().map(f -> f.getFachadaExterna().buscarHechosXColeccion(s)).toList();
-        fuentes.forEach(fuente -> {
-            FachadaFuente fachadaAsociada = this.fachadasExternas.get(fuente.getId());
-            fuente.setFachadaExterna(fachadaAsociada);
-        });
 
         List<List<HechoDTO>> hechosPorFuente = fuentes.stream()
-                .map(Fuente::getFachadaExterna)
-                .filter(Objects::nonNull)
-                .map(fachada -> fachada.buscarHechosXColeccion(s))
+                .map(fuente -> this.fuenteProxyFactory.getProxy(fuente.getEndpoint()))
+                .map(fuenteProxy -> fuenteProxy.buscarHechosXColeccion(coleccion))
                 .toList();
+
         return this.consenso.obtenerHechos(hechosPorFuente);
     }
 
     @Override
-    public void addFachadaFuentes(String idFuente, FachadaFuente fachadaFuente) {
-        fuenteRepository.findById(idFuente)
-                .ifPresentOrElse(
-                        f -> this.fachadasExternas.put(idFuente, fachadaFuente),
-                        () -> { throw new NoSuchElementException("No se encontró la fuente con id: " + idFuente); }
-                );
-    }
+    public void addFachadaFuentes(String idFuente, FachadaFuente fachadaFuente) {}
 
     @Override
     public void setConsensoStrategy(ConsensosEnum consensoEnum, String fuenteId) {

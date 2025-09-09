@@ -1,6 +1,5 @@
 package ar.edu.utn.dds.k3003.model;
 
-import ar.edu.utn.dds.k3003.facades.FachadaFuente;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,8 +25,6 @@ public class Fuente {
     private List<PdI> pdis = new ArrayList<>();
     @Transient
     private List<Coleccion> colecciones = new ArrayList<>();
-    @Transient
-    private FachadaFuente fachadaExterna;
 
     public Fuente (String id, String nombre, String endpoint) {
         this.id = id;
@@ -38,10 +35,6 @@ public class Fuente {
     public List<Hecho> obtenerTodosLosHechos() {
         return this.colecciones.stream().flatMap(x -> x.getHechos().stream()).collect(Collectors.toList());
     }
-
-    public FachadaFuente getFachadaExterna() {return this.fachadaExterna;}
-
-    public void setFachadaExterna(FachadaFuente fachadaFuente) {this.fachadaExterna = fachadaFuente;}
 
     public List<Coleccion> getColecciones() {return this.colecciones;}
 

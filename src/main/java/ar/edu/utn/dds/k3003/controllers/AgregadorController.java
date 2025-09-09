@@ -29,23 +29,24 @@ public class AgregadorController {
     // POST /fuentes
     @PostMapping("/fuentes")
     public ResponseEntity<FuenteDTO> agregarFuente(@RequestBody FuenteDTO fuenteDTO) {
-        FuenteDTO fuenteCreada = fachadaAgregador.agregar(fuenteDTO);
-        return ResponseEntity.ok(fuenteCreada);
+        try {
+            FuenteDTO fuenteCreada = fachadaAgregador.agregar(fuenteDTO);
+            return ResponseEntity.ok(fuenteCreada);
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+        catch (Exception e) {
+            return ResponseEntity.internalServerError().body(null);
+        }
     }
 
-    // GET /coleccion/{nombre}/hechos
-    @GetMapping("/coleccion/{nombre}/hechos")
-    public List<HechoDTO> hechosDeColeccion(@PathVariable String nombre) {
+    // GET /coleccion/{coleccion}/hechos
+    @GetMapping("/coleccion/{coleccion}/hechos")
+    public List<HechoDTO> hechosDeColeccion(@PathVariable String coleccion) {
         // Esto va a devolver todos los hechos de la colección con el nombre dado
-        return fachadaAgregador.hechos(nombre);
+        return fachadaAgregador.hechos(coleccion);
     }
-
-    // Endpoint raíz de prueba para validar que el controller funciona
-    @GetMapping("/coleccion/test")
-    public String test() {
-        return "ColeccionController activo ✅";
-    }
-
 
     // PATCH /consenso
     @PatchMapping("/consenso")
