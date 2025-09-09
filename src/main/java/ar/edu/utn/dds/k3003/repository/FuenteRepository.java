@@ -1,6 +1,6 @@
 package ar.edu.utn.dds.k3003.repository;
 
-import ar.edu.utn.dds.k3003.app.Fuente;
+import ar.edu.utn.dds.k3003.model.Fuente;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

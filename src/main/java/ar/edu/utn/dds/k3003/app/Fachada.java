@@ -1,30 +1,35 @@
 package ar.edu.utn.dds.k3003.app;
 
+import ar.edu.utn.dds.k3003.client.FuenteProxyFactory;
+import ar.edu.utn.dds.k3003.consenso.AlMenosDos;
+import ar.edu.utn.dds.k3003.consenso.Consenso;
+import ar.edu.utn.dds.k3003.consenso.Todos;
 import ar.edu.utn.dds.k3003.facades.FachadaAgregador;
 import ar.edu.utn.dds.k3003.facades.FachadaFuente;
 import ar.edu.utn.dds.k3003.facades.dtos.ConsensosEnum;
 import ar.edu.utn.dds.k3003.facades.dtos.FuenteDTO;
 import ar.edu.utn.dds.k3003.facades.dtos.HechoDTO;
+import ar.edu.utn.dds.k3003.model.Fuente;
 import ar.edu.utn.dds.k3003.repository.FuenteRepository;
-import ar.edu.utn.dds.k3003.repository.InMemoryFuenteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
 public class Fachada implements FachadaAgregador {
 
-    private FuenteRepository fuenteRepository;
+    private final FuenteRepository fuenteRepository;
+    private final FuenteProxyFactory fuenteProxyFactory;
     private Consenso consenso;
-    private final Map<String, FachadaFuente> fachadasExternas = new HashMap<>();
 
     @Autowired
-    public Fachada (/*FachadaFuente fachadaFuente*/) {
-        this.fuenteRepository = new InMemoryFuenteRepository();
+    public Fachada(FuenteRepository fuenteRepository, FuenteProxyFactory fuenteProxyFactory) {
+        this.fuenteRepository = fuenteRepository;
+        this.fuenteProxyFactory = fuenteProxyFactory;
         this.consenso = new Todos();
-        //this.fachadaFuente = fachadaFuente;
     }
 
     @Override
@@ -32,12 +37,15 @@ public class Fachada implements FachadaAgregador {
         String id = fuenteDTO.id() == null || fuenteDTO.id().isBlank()
             ? UUID.randomUUID().toString()
             : fuenteDTO.id();
+
+        if (!Pattern.matches("^(https?://).+", fuenteDTO.endpoint())) {
+            throw new IllegalArgumentException("El endpoint no es una URL válida");
+        }
+
         Fuente fuente = new Fuente(id, fuenteDTO.nombre(), fuenteDTO.endpoint());
-        //fuente.setFachadaExterna(this.fachadaFuente);
         fuenteRepository.save(fuente);
         return new FuenteDTO(id, fuenteDTO.nombre(), fuenteDTO.endpoint());
     }
-
 
     @Override
     public List<FuenteDTO> fuentes() {
@@ -53,30 +61,19 @@ public class Fachada implements FachadaAgregador {
     }
 
     @Override
-    public List<HechoDTO> hechos(String s) throws NoSuchElementException {
+    public List<HechoDTO> hechos(String coleccion) throws NoSuchElementException {
         List<Fuente> fuentes = this.fuenteRepository.findAll();
-        //List<List<HechoDTO>> hechosPorFuente = fuentes.stream().map(f -> f.getFachadaExterna().buscarHechosXColeccion(s)).toList();
-        fuentes.forEach(fuente -> {
-            FachadaFuente fachadaAsociada = this.fachadasExternas.get(fuente.getId());
-            fuente.setFachadaExterna(fachadaAsociada);
-        });
 
         List<List<HechoDTO>> hechosPorFuente = fuentes.stream()
-                .map(Fuente::getFachadaExterna)
-                .filter(Objects::nonNull)
-                .map(fachada -> fachada.buscarHechosXColeccion(s))
+                .map(fuente -> this.fuenteProxyFactory.getProxy(fuente.getEndpoint()))
+                .map(fuenteProxy -> fuenteProxy.buscarHechosXColeccion(coleccion))
                 .toList();
+
         return this.consenso.obtenerHechos(hechosPorFuente);
     }
 
     @Override
-    public void addFachadaFuentes(String idFuente, FachadaFuente fachadaFuente) {
-        fuenteRepository.findById(idFuente)
-                .ifPresentOrElse(
-                        f -> this.fachadasExternas.put(idFuente, fachadaFuente),
-                        () -> { throw new NoSuchElementException("No se encontró la fuente con id: " + idFuente); }
-                );
-    }
+    public void addFachadaFuentes(String idFuente, FachadaFuente fachadaFuente) {}
 
     @Override
     public void setConsensoStrategy(ConsensosEnum consensoEnum, String fuenteId) {
