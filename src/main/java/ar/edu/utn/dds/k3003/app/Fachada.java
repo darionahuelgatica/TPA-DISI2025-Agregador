@@ -4,7 +4,6 @@ import ar.edu.utn.dds.k3003.client.FuenteProxyFactory;
 import ar.edu.utn.dds.k3003.consenso.AlMenosDos;
 import ar.edu.utn.dds.k3003.consenso.Consenso;
 import ar.edu.utn.dds.k3003.consenso.Todos;
-import ar.edu.utn.dds.k3003.facades.FachadaAgregador;
 import ar.edu.utn.dds.k3003.facades.FachadaFuente;
 import ar.edu.utn.dds.k3003.facades.dtos.ConsensosEnum;
 import ar.edu.utn.dds.k3003.facades.dtos.FuenteDTO;
@@ -19,7 +18,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
-public class Fachada implements FachadaAgregador {
+public class Fachada implements FachadaAgregadorExtended {
 
     private final FuenteRepository fuenteRepository;
     private final FuenteProxyFactory fuenteProxyFactory;
@@ -90,5 +89,23 @@ public class Fachada implements FachadaAgregador {
             case AL_MENOS_2 -> new AlMenosDos();
             default -> throw new IllegalArgumentException("ConsensoEnum no reconocido: " + consensoEnum);
         };
+    }
+
+    public void borrarFuente(String fuenteId){
+        var fuenteDb = this.fuenteRepository.findById(fuenteId);
+        if(fuenteDb.isEmpty())
+            throw new NoSuchElementException();
+
+        var fuente = fuenteDb.get();
+        fuente.setActivo(false);
+        fuenteRepository.save(fuente);
+    }
+
+    public void borrarTodasLasFuentes(){
+        var fuentes = this.fuenteRepository.findAll();
+        for(Fuente fuente : fuentes) {
+            fuente.setActivo(false);
+            fuenteRepository.save(fuente);
+        }
     }
 }

@@ -1,28 +1,34 @@
 package ar.edu.utn.dds.k3003.controllers;
 
+import ar.edu.utn.dds.k3003.app.FachadaAgregadorExtended;
 import ar.edu.utn.dds.k3003.consenso.ConsensoRequest;
-import ar.edu.utn.dds.k3003.app.Fachada;
 import ar.edu.utn.dds.k3003.facades.dtos.ConsensosEnum;
 import ar.edu.utn.dds.k3003.facades.dtos.FuenteDTO;
 import ar.edu.utn.dds.k3003.facades.dtos.HechoDTO;
+import io.micrometer.core.instrument.MeterRegistry;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api")
 public class AgregadorController {
 
-    private final Fachada fachadaAgregador;
+    private final FachadaAgregadorExtended fachadaAgregador;
+    private final MeterRegistry meterRegistry;
 
-    public AgregadorController(Fachada fachadaAgregador) {
+    public AgregadorController(FachadaAgregadorExtended fachadaAgregador, MeterRegistry meterRegistry) {
         this.fachadaAgregador = fachadaAgregador;
+        this.meterRegistry = meterRegistry;
     }
 
     // GET /fuentes
     @GetMapping("/fuentes")
     public List<FuenteDTO> listarFuentes() {
+        meterRegistry.counter("agregador.fuentes.listadas").increment();
         return fachadaAgregador.fuentes();
     }
 
@@ -30,6 +36,7 @@ public class AgregadorController {
     @PostMapping("/fuentes")
     public ResponseEntity<FuenteDTO> agregarFuente(@RequestBody FuenteDTO fuenteDTO) {
         try {
+            meterRegistry.counter("agregador.fuentes.creadas").increment();
             FuenteDTO fuenteCreada = fachadaAgregador.agregar(fuenteDTO);
             return ResponseEntity.ok(fuenteCreada);
         }
@@ -41,10 +48,20 @@ public class AgregadorController {
         }
     }
 
+    @DeleteMapping("/fuentes")
+    public ResponseEntity<Void> borrarFuentes(@RequestParam(value = "fuenteId", required = false) String fuenteId) {
+        if(fuenteId != null)
+            try{ fachadaAgregador.borrarFuente(fuenteId); } catch (NoSuchElementException e){ return ResponseEntity.notFound().build(); }
+        else
+            fachadaAgregador.borrarTodasLasFuentes();
+
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
     // GET /coleccion/{coleccion}/hechos
     @GetMapping("/coleccion/{coleccion}/hechos")
     public List<HechoDTO> hechosDeColeccion(@PathVariable String coleccion) {
-        // Esto va a devolver todos los hechos de la colección con el nombre dado
+        meterRegistry.counter("agregador.hechos.listados").increment();
         return fachadaAgregador.hechos(coleccion);
     }
 
@@ -58,8 +75,8 @@ public class AgregadorController {
         };
 
         fachadaAgregador.setConsensoStrategy(tipo, request.getColeccion());
+        meterRegistry.counter("agregador.consenso.actualizado").increment();
         return ResponseEntity.ok().build();
     }
-
 }
 
