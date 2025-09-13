@@ -31,4 +31,14 @@ public class InMemoryFuenteRepository implements FuenteRepository {
         this.fuentes.add(col);
         return col;
     }
+
+    @Override
+    public void deleteById(String id) {
+
+    }
+
+    @Override
+    public void deleteAll() {
+
+    }
 }

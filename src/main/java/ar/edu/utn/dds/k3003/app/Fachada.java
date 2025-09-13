@@ -92,20 +92,10 @@ public class Fachada implements FachadaAgregadorExtended {
     }
 
     public void borrarFuente(String fuenteId){
-        var fuenteDb = this.fuenteRepository.findById(fuenteId);
-        if(fuenteDb.isEmpty())
-            throw new NoSuchElementException();
-
-        var fuente = fuenteDb.get();
-        fuente.setActivo(false);
-        fuenteRepository.save(fuente);
+        this.fuenteRepository.deleteById(fuenteId);
     }
 
     public void borrarTodasLasFuentes(){
-        var fuentes = this.fuenteRepository.findAll();
-        for(Fuente fuente : fuentes) {
-            fuente.setActivo(false);
-            fuenteRepository.save(fuente);
-        }
+        this.fuenteRepository.deleteAll();
     }
 }

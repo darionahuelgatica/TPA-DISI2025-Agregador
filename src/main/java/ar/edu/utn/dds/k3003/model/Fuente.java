@@ -20,7 +20,6 @@ public class Fuente {
     private String id;
     private String nombre;
     private String endpoint;
-    private boolean activo;
 
     @Transient
     private List<PdI> pdis = new ArrayList<>();
@@ -31,7 +30,6 @@ public class Fuente {
         this.id = id;
         this.nombre = nombre;
         this.endpoint = endpoint;
-        this.activo = true;
     }
 
     public List<Hecho> obtenerTodosLosHechos() {
@@ -62,13 +60,5 @@ public class Fuente {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public boolean isActivo() {
-        return activo;
-    }
-
-    public void setActivo(boolean activo) {
-        this.activo = activo;
     }
 }

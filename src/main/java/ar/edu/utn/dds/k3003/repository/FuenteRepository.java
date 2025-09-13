@@ -12,4 +12,6 @@ public interface FuenteRepository {
     Optional<Fuente> findById(String id);
     List<Fuente> findAll();
     Fuente save(Fuente col);
+    void deleteById(String id);
+    void deleteAll();
 }
