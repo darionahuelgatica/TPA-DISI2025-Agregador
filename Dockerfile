@@ -1,27 +1,32 @@
-# Etapa 1: Compilación con Maven y JDK 21
 FROM maven:3.9.6-eclipse-temurin-21 AS build
 
-# Setear el directorio de trabajo
 WORKDIR /app
 
-# Copiar los archivos de Maven primero para aprovechar la cache
 COPY pom.xml .
 COPY src ./src
 
-# Compilar la app, saltando los tests para que el build sea más rápido
 RUN mvn clean package -DskipTests
 
-# Etapa 2: Imagen final para ejecutar la app
 FROM eclipse-temurin:21-jdk
 
-# Crear directorio de trabajo
 WORKDIR /app
 
-# Copiar el .jar generado en la etapa anterior
+ADD https://dtdg.co/latest-java-tracer dd-java-agent.jar
+
 COPY --from=build /app/target/*.jar app.jar
 
-# Exponer el puerto donde corre tu aplicación
 EXPOSE 8080
 
-# Comando de inicio
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENV DD_SITE=datadoghq.com
+ENV DD_API_KEY=${DD_API_KEY}
+ENV DD_SERVICE=my-api-service
+ENV DD_ENV=production
+ENV DD_VERSION=1.0.0
+ENV DD_LOGS_INJECTION=true
+ENV DD_TRACE_ENABLED=true
+ENV DD_TRACE_AGENT_URL="https://trace.agent.datadoghq.com"
+ENV DD_INSTRUMENTATION_TELEMETRY_ENABLED=true
+ENV DD_DOGSTATSD_PORT=8125
+ENV DD_AGENT_HOST="localhost"
+
+ENTRYPOINT ["java", "-javaagent:/app/dd-java-agent.jar", "-jar", "app.jar"]
