@@ -1,4 +1,4 @@
-package ar.edu.utn.dds.k3003.client;
+package ar.edu.utn.dds.k3003.dal.client;
 
 import ar.edu.utn.dds.k3003.facades.dtos.HechoDTO;
 import retrofit2.Call;

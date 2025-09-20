@@ -1,4 +1,4 @@
-package ar.edu.utn.dds.k3003.client;
+package ar.edu.utn.dds.k3003.dal.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
