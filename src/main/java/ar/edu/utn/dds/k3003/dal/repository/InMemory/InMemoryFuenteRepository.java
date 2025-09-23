@@ -2,6 +2,7 @@ package ar.edu.utn.dds.k3003.dal.repository.InMemory;
 
 import ar.edu.utn.dds.k3003.dal.model.FuenteDeHechos;
 import ar.edu.utn.dds.k3003.dal.repository.FuenteRepository;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@Profile("inmemory")
 public class InMemoryFuenteRepository implements FuenteRepository {
 
     private List<FuenteDeHechos> fuentes;

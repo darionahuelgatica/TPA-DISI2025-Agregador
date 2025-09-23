@@ -5,6 +5,7 @@ import ar.edu.utn.dds.k3003.bll.services.IColeccionService;
 import ar.edu.utn.dds.k3003.bll.services.IFuenteService;
 import ar.edu.utn.dds.k3003.facades.dtos.HechoDTO;
 import io.micrometer.core.instrument.MeterRegistry;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,7 @@ public class ColeccionController {
     private final IFuenteService fuenteService;
     private final MeterRegistry meterRegistry;
 
+    @Autowired
     public ColeccionController(IColeccionService coleccionService, IFuenteService fuenteService, MeterRegistry meterRegistry) {
         this.coleccionService = coleccionService;
         this.fuenteService = fuenteService;

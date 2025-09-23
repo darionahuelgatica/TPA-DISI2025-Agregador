@@ -3,6 +3,7 @@ package ar.edu.utn.dds.k3003.controllers;
 import ar.edu.utn.dds.k3003.bll.services.IFuenteService;
 import ar.edu.utn.dds.k3003.facades.dtos.FuenteDTO;
 import io.micrometer.core.instrument.MeterRegistry;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,7 @@ public class FuenteController {
     private final IFuenteService fuenteService;
     private final MeterRegistry meterRegistry;
 
+    @Autowired
     public FuenteController(IFuenteService fuenteService, MeterRegistry meterRegistry) {
         this.fuenteService = fuenteService;
         this.meterRegistry = meterRegistry;
