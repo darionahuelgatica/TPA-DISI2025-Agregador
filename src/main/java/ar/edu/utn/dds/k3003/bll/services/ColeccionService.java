@@ -1,6 +1,6 @@
 package ar.edu.utn.dds.k3003.bll.services;
 
-import ar.edu.utn.dds.k3003.bll.consenso.ConsensoEnum;
+import ar.edu.utn.dds.k3003.bll.consenso.*;
 import ar.edu.utn.dds.k3003.dal.client.FuenteProxyFactory;
 import ar.edu.utn.dds.k3003.dal.model.Coleccion;
 import ar.edu.utn.dds.k3003.dal.repository.ColeccionRepository;
@@ -8,7 +8,6 @@ import ar.edu.utn.dds.k3003.facades.dtos.FuenteDTO;
 import ar.edu.utn.dds.k3003.facades.dtos.HechoDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -17,11 +16,13 @@ public class ColeccionService implements IColeccionService {
 
     private final FuenteProxyFactory fuenteProxyFactory;
     private final ColeccionRepository coleccionRepository;
+    private final IConsensoFactory consensoFactory;
 
     @Autowired
-    public ColeccionService(FuenteProxyFactory fuenteProxyFactory, ColeccionRepository coleccionRepository) {
+    public ColeccionService(FuenteProxyFactory fuenteProxyFactory, ColeccionRepository coleccionRepository, IConsensoFactory consensoFactory) {
         this.fuenteProxyFactory = fuenteProxyFactory;
         this.coleccionRepository = coleccionRepository;
+        this.consensoFactory = consensoFactory;
     }
 
     @Override
@@ -32,7 +33,7 @@ public class ColeccionService implements IColeccionService {
             ? this.coleccionRepository.save(new Coleccion(coleccionId))
             : coleccionDb.get();
 
-        var consenso = coleccion.getConsenso().toConsenso();
+        Consenso consenso = consensoFactory.crearConsenso(coleccion.getConsenso());
 
         List<List<HechoDTO>> hechosPorFuente = fuentes.stream()
                 .map(fuente -> this.fuenteProxyFactory.getProxy(fuente.endpoint()))

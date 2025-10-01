@@ -41,6 +41,7 @@ public class ColeccionController {
         ConsensoEnum consensoEnum = switch (consenso.toLowerCase()) {
             case "todos" -> ConsensoEnum.TODOS;
             case "almenos2" -> ConsensoEnum.AL_MENOS_2;
+            case "estricto" -> ConsensoEnum.ESTRICTO;
             default -> throw new IllegalArgumentException("Tipo de consenso no válido");
         };
 
