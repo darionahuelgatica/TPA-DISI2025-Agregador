@@ -4,8 +4,8 @@ import ar.edu.utn.dds.k3003.bll.consenso.*;
 import ar.edu.utn.dds.k3003.dal.client.FuenteProxyFactory;
 import ar.edu.utn.dds.k3003.dal.model.Coleccion;
 import ar.edu.utn.dds.k3003.dal.repository.ColeccionRepository;
-import ar.edu.utn.dds.k3003.facades.dtos.FuenteDTO;
-import ar.edu.utn.dds.k3003.facades.dtos.HechoDTO;
+import ar.edu.utn.dds.k3003.dto.FuenteDTO;
+import ar.edu.utn.dds.k3003.dto.HechoDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -36,7 +36,7 @@ public class ColeccionService implements IColeccionService {
         Consenso consenso = consensoFactory.crearConsenso(coleccion.getConsenso());
 
         List<List<HechoDTO>> hechosPorFuente = fuentes.stream()
-                .map(fuente -> this.fuenteProxyFactory.getProxy(fuente.endpoint()))
+                .map(fuente -> this.fuenteProxyFactory.getProxy(fuente.getEndpoint()))
                 .map(fuenteProxy -> fuenteProxy.buscarHechosXColeccion(coleccionId))
                 .toList();
 

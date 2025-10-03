@@ -1,17 +1,17 @@
 package ar.edu.utn.dds.k3003.dal.client;
 
-import ar.edu.utn.dds.k3003.facades.dtos.SolicitudDTO;
+import ar.edu.utn.dds.k3003.dto.SolicitudDTO;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import io.javalin.http.HttpStatus;
 import jakarta.annotation.PostConstruct;
 import lombok.SneakyThrows;
 import org.hibernate.query.IllegalQueryOperationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -58,7 +58,7 @@ public class SolicitudesProxy implements IFachadaSolicitudes {
             if (result.isSuccessful())
                 return result.body();
 
-            if (result.code() == HttpStatus.BAD_REQUEST.getCode())
+            if (result.code() == HttpStatus.BAD_REQUEST.value())
                 throw new IllegalQueryOperationException(result.message());
 
             throw new RuntimeException("Error conectándose con el componente solicitudes");

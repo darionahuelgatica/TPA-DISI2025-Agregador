@@ -3,7 +3,7 @@ package ar.edu.utn.dds.k3003.controllers;
 import ar.edu.utn.dds.k3003.bll.consenso.ConsensoEnum;
 import ar.edu.utn.dds.k3003.bll.services.IColeccionService;
 import ar.edu.utn.dds.k3003.bll.services.IFuenteService;
-import ar.edu.utn.dds.k3003.facades.dtos.HechoDTO;
+import ar.edu.utn.dds.k3003.dto.HechoDTO;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

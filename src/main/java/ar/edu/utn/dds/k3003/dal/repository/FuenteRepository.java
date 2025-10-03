@@ -8,7 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface FuenteRepository {
-
     Optional<FuenteDeHechos> findById(String id);
     List<FuenteDeHechos> findAll();
     FuenteDeHechos save(FuenteDeHechos fuente);

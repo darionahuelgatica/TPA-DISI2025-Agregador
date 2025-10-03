@@ -1,6 +1,6 @@
 package ar.edu.utn.dds.k3003.bll.consenso;
 
-import ar.edu.utn.dds.k3003.facades.dtos.HechoDTO;
+import ar.edu.utn.dds.k3003.dto.HechoDTO;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,7 +13,7 @@ public class Todos implements Consenso {
         return hechosPorFuente.stream()
                 .flatMap(List::stream)
                 .collect(Collectors.toMap(
-                        HechoDTO::id,
+                        HechoDTO::getId,
                         hecho -> hecho,
                         (h1, h2) -> h1
                 ))

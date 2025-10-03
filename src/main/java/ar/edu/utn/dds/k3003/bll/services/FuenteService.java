@@ -2,7 +2,7 @@ package ar.edu.utn.dds.k3003.bll.services;
 
 import ar.edu.utn.dds.k3003.dal.model.FuenteDeHechos;
 import ar.edu.utn.dds.k3003.dal.repository.FuenteRepository;
-import ar.edu.utn.dds.k3003.facades.dtos.FuenteDTO;
+import ar.edu.utn.dds.k3003.dto.FuenteDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,16 +23,16 @@ public class FuenteService implements IFuenteService {
 
     @Override
     public FuenteDTO addFuente(FuenteDTO fuenteDTO) {
-        if(fuenteDTO.id() == null || fuenteDTO.id().isBlank())
+        if(fuenteDTO.getId() == null || fuenteDTO.getId().isBlank())
             throw new IllegalArgumentException("Debe especificar un identificador de Fuente");
 
-        if (!Pattern.matches("^(https?://).+", fuenteDTO.endpoint())) {
+        if (!Pattern.matches("^(https?://).+", fuenteDTO.getEndpoint())) {
             throw new IllegalArgumentException("El endpoint no es una URL válida");
         }
 
-        FuenteDeHechos fuente = new FuenteDeHechos(fuenteDTO.id(), fuenteDTO.nombre(), fuenteDTO.endpoint());
+        FuenteDeHechos fuente = new FuenteDeHechos(fuenteDTO.getId(), fuenteDTO.getNombre(), fuenteDTO.getEndpoint());
         fuenteRepository.save(fuente);
-        return new FuenteDTO(fuenteDTO.id(), fuenteDTO.nombre(), fuenteDTO.endpoint());
+        return new FuenteDTO(fuenteDTO.getId(), fuenteDTO.getNombre(), fuenteDTO.getEndpoint());
     }
 
     @Override

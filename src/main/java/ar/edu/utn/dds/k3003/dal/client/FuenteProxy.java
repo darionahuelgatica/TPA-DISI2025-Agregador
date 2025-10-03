@@ -1,24 +1,20 @@
 package ar.edu.utn.dds.k3003.dal.client;
 
-import ar.edu.utn.dds.k3003.facades.FachadaFuente;
-import ar.edu.utn.dds.k3003.facades.FachadaProcesadorPdI;
-import ar.edu.utn.dds.k3003.facades.dtos.*;
+import ar.edu.utn.dds.k3003.dto.HechoDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.javalin.http.HttpStatus;
 import lombok.SneakyThrows;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
-
+import org.springframework.http.HttpStatus;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
-public class FuenteProxy implements FachadaFuente {
+public class FuenteProxy implements IFachadaFuente {
 
     private final FuenteRetrofitClient service;
-    private String url;
+    private final String url;
 
     public FuenteProxy(String fuenteApiUrl, ObjectMapper objectMapper) {
         if(fuenteApiUrl == null || fuenteApiUrl.isBlank()) {
@@ -41,44 +37,9 @@ public class FuenteProxy implements FachadaFuente {
         if (execute.isSuccessful())
             return execute.body();
 
-        if(execute.code() == HttpStatus.NOT_FOUND.getCode())
+        if(execute.code() == HttpStatus.NOT_FOUND.value())
             return Collections.emptyList();
 
         throw new RuntimeException(String.format("Error conectandose con Fuente en %s", this.url));
-    }
-
-    @Override
-    public ColeccionDTO agregar(ColeccionDTO coleccionDTO) {
-        return null;
-    }
-
-    @Override
-    public ColeccionDTO buscarColeccionXId(String coleccionId) throws NoSuchElementException {
-        return null;
-    }
-
-    @Override
-    public HechoDTO agregar(HechoDTO hechoDTO) {
-        return null;
-    }
-
-    @Override
-    public HechoDTO buscarHechoXId(String hechoId) throws NoSuchElementException {
-        return null;
-    }
-
-    @Override
-    public void setProcesadorPdI(FachadaProcesadorPdI procesador) {
-        return;
-    }
-
-    @Override
-    public PdIDTO agregar(PdIDTO pdIDTO) throws IllegalStateException {
-        return null;
-    }
-
-    @Override
-    public List<ColeccionDTO> colecciones() {
-        return null;
     }
 }

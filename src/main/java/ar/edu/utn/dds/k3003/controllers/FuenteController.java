@@ -1,7 +1,7 @@
 package ar.edu.utn.dds.k3003.controllers;
 
 import ar.edu.utn.dds.k3003.bll.services.IFuenteService;
-import ar.edu.utn.dds.k3003.facades.dtos.FuenteDTO;
+import ar.edu.utn.dds.k3003.dto.FuenteDTO;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,9 +25,15 @@ public class FuenteController {
     }
 
     @GetMapping
-    public List<FuenteDTO> listarFuentes() {
+    public ResponseEntity<List<FuenteDTO>> listarFuentes() {
         meterRegistry.counter("agregador.fuentes.listadas").increment();
-        return fuenteService.listFuentes();
+        return ResponseEntity.ok(fuenteService.listFuentes());
+    }
+
+    @GetMapping("{fuenteId}")
+    public ResponseEntity<FuenteDTO> getFuenteById(@PathVariable String fuenteId) {
+        meterRegistry.counter("agregador.fuentes.obtenidas").increment();
+        return  ResponseEntity.ok(fuenteService.getFuenteById(fuenteId));
     }
 
     @PostMapping
@@ -52,6 +58,6 @@ public class FuenteController {
         else
             fuenteService.borrarTodasLasFuentes();
 
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

@@ -1,6 +1,6 @@
 package ar.edu.utn.dds.k3003.bll.services;
 
-import ar.edu.utn.dds.k3003.facades.dtos.FuenteDTO;
+import ar.edu.utn.dds.k3003.dto.FuenteDTO;
 
 import java.util.List;
 import java.util.NoSuchElementException;
