@@ -11,7 +11,7 @@ public class ConsensoFactory implements IConsensoFactory{
         this.solicitudes = solicitudes;
     }
 
-    public Consenso crearConsenso(ConsensoEnum consensoEnum){
+    public Consenso getConsenso(ConsensoEnum consensoEnum){
         switch (consensoEnum) {
             case AL_MENOS_2: return new AlMenosDos();
             case TODOS: return new Todos();

@@ -33,11 +33,11 @@ public class ColeccionService implements IColeccionService {
             ? this.coleccionRepository.save(new Coleccion(coleccionId))
             : coleccionDb.get();
 
-        Consenso consenso = consensoFactory.crearConsenso(coleccion.getConsenso());
+        Consenso consenso = consensoFactory.getConsenso(coleccion.getConsenso());
 
         List<List<HechoDTO>> hechosPorFuente = fuentes.stream()
-                .map(fuente -> this.fuenteProxyFactory.getProxy(fuente.getEndpoint()))
-                .map(fuenteProxy -> fuenteProxy.buscarHechosXColeccion(coleccionId))
+                .map(fuente -> this.fuenteProxyFactory.getFuenteProxy(fuente.getEndpoint()))
+                .map(fuenteProxy -> fuenteProxy.getHechos(coleccionId))
                 .toList();
 
         return consenso.obtenerHechos(hechosPorFuente);

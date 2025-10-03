@@ -16,7 +16,7 @@ public class FuenteProxyFactory {
         this.objectMapper = objectMapper;
     }
 
-    public FuenteProxy getProxy(String endpoint) {
-        return cache.computeIfAbsent(endpoint, ep -> new FuenteProxy(ep, objectMapper));
+    public FuenteProxy getFuenteProxy(String url) {
+        return cache.computeIfAbsent(url, ep -> new FuenteProxy(ep, objectMapper));
     }
 }

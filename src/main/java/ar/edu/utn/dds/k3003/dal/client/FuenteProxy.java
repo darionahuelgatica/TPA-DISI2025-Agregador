@@ -32,7 +32,7 @@ public class FuenteProxy implements IFachadaFuente {
 
     @SneakyThrows
     @Override
-    public List<HechoDTO> buscarHechosXColeccion(String coleccionId) throws NoSuchElementException {
+    public List<HechoDTO> getHechos(String coleccionId) throws NoSuchElementException {
         Response<List<HechoDTO>> execute = service.get(coleccionId).execute();
         if (execute.isSuccessful())
             return execute.body();

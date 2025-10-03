@@ -6,5 +6,5 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 public interface IFachadaFuente {
-    List<HechoDTO> buscarHechosXColeccion(String coleccionId) throws NoSuchElementException;
+    List<HechoDTO> getHechos(String coleccionId) throws NoSuchElementException;
 }

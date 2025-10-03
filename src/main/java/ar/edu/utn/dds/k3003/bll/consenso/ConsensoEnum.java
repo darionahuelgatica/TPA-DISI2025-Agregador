@@ -4,5 +4,4 @@ public enum ConsensoEnum {
     TODOS,
     AL_MENOS_2,
     ESTRICTO;
-
 }
