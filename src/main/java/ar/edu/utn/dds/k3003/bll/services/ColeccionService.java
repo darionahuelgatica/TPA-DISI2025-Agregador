@@ -45,11 +45,12 @@ public class ColeccionService implements IColeccionService {
 
     @Override
     public void setConsenso(String coleccionId, ConsensoEnum consenso) {
-        var coleccion = this.coleccionRepository.findById(coleccionId);
-        if(coleccion.isEmpty())
-            throw new NoSuchElementException(coleccionId + " no existe");
+        var coleccionDb = this.coleccionRepository.findById(coleccionId);
+        var coleccion = coleccionDb.isEmpty()
+                ? new Coleccion(coleccionId)
+                : coleccionDb.get();
 
-        coleccion.get().setConsenso(consenso);
-        this.coleccionRepository.save(coleccion.get());
+        coleccion.setConsenso(consenso);
+        this.coleccionRepository.save(coleccion);
     }
 }
