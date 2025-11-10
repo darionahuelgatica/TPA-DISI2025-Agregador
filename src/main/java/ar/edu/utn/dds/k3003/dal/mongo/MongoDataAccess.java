@@ -32,7 +32,7 @@ public class MongoDataAccess {
                 .set("hechoId", hecho.getHechoId())
                 .set("fuenteId", hecho.getFuenteId())
                 .set("titulo",hecho.getTitulo())
-                .set("descripcion",hecho.getDescripcion())
+                .set("nombreColeccion",hecho.getNombreColeccion())
                 .set("eliminado", false)
                 .currentDate("updatedAt");
         if (hecho.getOccurredAt() != null) {

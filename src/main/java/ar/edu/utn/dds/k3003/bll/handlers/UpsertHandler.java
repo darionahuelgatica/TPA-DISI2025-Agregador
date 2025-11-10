@@ -38,10 +38,6 @@ public class UpsertHandler implements IHandler {
             hecho.setHechoId(hechoId.asText());
             hecho.setFuenteId(fuenteId.asText());
 
-            var descripcion = rootNode.get("descripcion");
-            if(descripcion != null && !descripcion.isMissingNode())
-                hecho.setDescripcion(descripcion.asText());
-
             var titulo = rootNode.get("titulo");
             if(titulo != null && !titulo.isMissingNode())
                 hecho.setTitulo(titulo.asText());
