@@ -1,10 +1,10 @@
 package ar.edu.utn.dds.k3003.subscribers;
 
 import ar.edu.utn.dds.k3003.exceptions.NonTransientException;
-import ar.edu.utn.dds.k3003.bll.handlers.DeleteHandler;
-import ar.edu.utn.dds.k3003.bll.handlers.OperacionEnum;
-import ar.edu.utn.dds.k3003.bll.handlers.PdiHandler;
-import ar.edu.utn.dds.k3003.bll.handlers.UpsertHandler;
+import ar.edu.utn.dds.k3003.bll.operacion.DeleteHandler;
+import ar.edu.utn.dds.k3003.bll.operacion.OperacionEnum;
+import ar.edu.utn.dds.k3003.bll.operacion.PdiHandler;
+import ar.edu.utn.dds.k3003.bll.operacion.UpsertHandler;
 import com.rabbitmq.client.Channel;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
