@@ -1,6 +1,5 @@
 package ar.edu.utn.dds.k3003.dal.mongo;
 
-import ar.edu.utn.dds.k3003.dal.model.Hecho;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -8,8 +7,6 @@ import org.springframework.data.mongodb.core.query.Query;
 
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
-
-import java.time.Instant;
 
 @Component
 public class MongoDataAccess {
@@ -22,26 +19,17 @@ public class MongoDataAccess {
         this.mongoTemplate = mongoTemplate;
         this.collection = collection;
     }
-
-    public void upsert(Hecho hecho) {
-        String id = hecho.getFuenteId() + ":" + hecho.getHechoId();
-
-        Query q = Query.query(Criteria.where("_id").is(id));
+    public void upsert(HechoDoc doc) {
+        Query q = new Query(Criteria.where("_id").is(doc.getId()));
         Update u = new Update()
-                .setOnInsert("_id", id)
-                .set("hechoId", hecho.getHechoId())
-                .set("fuenteId", hecho.getFuenteId())
-                .set("titulo",hecho.getTitulo())
-                .set("nombreColeccion",hecho.getNombreColeccion())
-                .set("eliminado", false)
-                .currentDate("updatedAt");
-        if (hecho.getOccurredAt() != null) {
-            u.setOnInsert("createdAt", hecho.getOccurredAt());
-        } else {
-            u.setOnInsert("createdAt", Instant.now());
-        }
-
-        mongoTemplate.getDb().getCollection(collection)
-                .updateOne(q.getQueryObject(), u.getUpdateObject(), new com.mongodb.client.model.UpdateOptions().upsert(true));
+                .set("hechoId", doc.getHechoId())
+                .set("fuenteId", doc.getFuenteId())
+                .set("nombreColeccion", doc.getNombreColeccion())
+                .set("titulo", doc.getTitulo())
+                .set("etiquetas", doc.getEtiquetas())
+                .set("eliminado", doc.isEliminado())
+                .set("updatedAt", doc.getUpdatedAt())
+                .setOnInsert("createdAt", doc.getCreatedAt());
+        mongoTemplate.upsert(q, u, HechoDoc.class, this.collection);
     }
 }

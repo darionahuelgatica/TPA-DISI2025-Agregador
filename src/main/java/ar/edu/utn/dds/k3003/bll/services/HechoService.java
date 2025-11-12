@@ -24,16 +24,14 @@ public class HechoService {
 
     public Page<HechoDTO> search(String text, String etiquetasCsv, int page, int size) {
         String queryText = text == null ? "" : text.trim();
-
         Pageable pageable = PageRequest.of(page, size);
-
         Criteria base = Criteria.where("eliminado").is(false);
 
         List<String> etiquetas = parseCsv(etiquetasCsv);
         if (!etiquetas.isEmpty()) {
             base = new Criteria().andOperator(
-                    base,
-                    Criteria.where("etiquetas").all(etiquetas)
+                base,
+                Criteria.where("etiquetas").all(etiquetas)
             );
         }
 
@@ -43,15 +41,13 @@ public class HechoService {
             TextCriteria txt = TextCriteria.forLanguage("spanish").matching(queryText);
 
             Query tq = TextQuery.queryText(txt)
-                    .sortByScore() // primero por score
-                    .with(Sort.by(Sort.Direction.DESC, "updatedAt")) // empate por updatedAt
+                    .sortByScore()
+                    .with(Sort.by(Sort.Direction.DESC, "updatedAt"))
                     .with(pageable);
 
-            // sumar el AND de base (eliminado + etiquetas)
             tq.addCriteria(base);
 
             var list = mongo.find(tq, HechoDoc.class);
-            // count: misma criteria sin paginación ni sort
             Query countQ = new Query().addCriteria(base).addCriteria(txt);
             long total = mongo.count(countQ, HechoDoc.class);
 
@@ -75,7 +71,7 @@ public class HechoService {
         return Arrays.stream(csv.split(","))
                 .map(String::trim)
                 .filter(s -> !s.isBlank())
-                .map(String::toLowerCase) // asumiendo que guardás etiquetas en minúsculas
+                .map(String::toLowerCase)
                 .distinct()
                 .collect(Collectors.toList());
     }
