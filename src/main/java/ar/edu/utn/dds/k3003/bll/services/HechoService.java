@@ -2,7 +2,12 @@ package ar.edu.utn.dds.k3003.bll.services;
 
 import ar.edu.utn.dds.k3003.dal.mongo.HechoDoc;
 import ar.edu.utn.dds.k3003.dto.HechoDTO;
-import org.springframework.data.domain.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -16,54 +21,67 @@ import java.util.stream.Collectors;
 
 @Service
 public class HechoService {
+
     private final MongoTemplate mongo;
 
+    @Autowired
     public HechoService(MongoTemplate mongo) {
         this.mongo = mongo;
     }
 
-    public Page<HechoDTO> search(String text, String etiquetasCsv, int page, int size) {
-        String queryText = text == null ? "" : text.trim();
-        Pageable pageable = PageRequest.of(page, size);
-        Criteria base = Criteria.where("eliminado").is(false);
+    public Page<HechoDTO> search(String text, String tagsCsv, int skip, int limit) {
+        boolean hasText = text != null && !text.isBlank();
+        List<String> tags = parseCsv(tagsCsv);
 
-        List<String> etiquetas = parseCsv(etiquetasCsv);
-        if (!etiquetas.isEmpty()) {
-            base = new Criteria().andOperator(
-                base,
-                Criteria.where("etiquetas").all(etiquetas)
-            );
-        }
+        if (limit <= 0) limit = 10;
+        int page = Math.max(0, skip / limit);
+        Pageable pageable = PageRequest.of(page, limit);
 
-        boolean hasText = !queryText.isBlank();
+        Query dataQ = buildQuery(hasText, text, tags);
+
+        if (hasText)
+            dataQ.with(Sort.by(Sort.Direction.DESC, "updatedAt"));
+        else
+            dataQ.with(Sort.by(Sort.Direction.DESC, "updatedAt"));
+
+        dataQ.with(pageable);
+
+        List<HechoDTO> content = mongo.find(dataQ, HechoDoc.class)
+                .stream()
+                .map(HechoDTO::fromDoc)
+                .toList();
+
+        Query countQ = buildQuery(hasText, text, tags);
+        long total = mongo.count(countQ, HechoDoc.class);
+
+        return new PageImpl<>(content, pageable, total);
+    }
+
+    private Query buildQuery(boolean hasText, String text, List<String> tags) {
+        Query q;
 
         if (hasText) {
-            TextCriteria txt = TextCriteria.forLanguage("spanish").matching(queryText);
-
-            Query tq = TextQuery.queryText(txt)
-                    .sortByScore()
-                    .with(Sort.by(Sort.Direction.DESC, "updatedAt"))
-                    .with(pageable);
-
-            tq.addCriteria(base);
-
-            var list = mongo.find(tq, HechoDoc.class);
-            Query countQ = new Query().addCriteria(base).addCriteria(txt);
-            long total = mongo.count(countQ, HechoDoc.class);
-
-            var dtos = list.stream().map(HechoDTO::from).toList();
-            return new PageImpl<>(dtos, pageable, total);
+            TextCriteria tc = TextCriteria.forDefaultLanguage().matching(text);
+            q = TextQuery.queryText(tc); // sin sort ni paginación acá
         } else {
-            Query qy = new Query(base)
-                    .with(Sort.by(Sort.Direction.DESC, "updatedAt"))
-                    .with(pageable);
-
-            var list = mongo.find(qy, HechoDoc.class);
-            long total = mongo.count(new Query(base), HechoDoc.class);
-
-            var dtos = list.stream().map(HechoDTO::from).toList();
-            return new PageImpl<>(dtos, pageable, total);
+            q = new Query();
         }
+
+        if (tags != null && !tags.isEmpty()) {
+            q.addCriteria(criteriaTagsAND(tags));
+        }
+
+        q.addCriteria(Criteria.where("eliminado").is(false));
+
+        return q;
+    }
+
+    private Criteria criteriaTagsAND(List<String> tags) {
+        Criteria[] perTag = tags.stream()
+                .map(tag -> Criteria.where("pdis.etiquetas").is(tag))
+                .toArray(Criteria[]::new);
+
+        return new Criteria().andOperator(perTag);
     }
 
     private static List<String> parseCsv(String csv) {

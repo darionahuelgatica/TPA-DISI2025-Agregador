@@ -1,10 +1,7 @@
 package ar.edu.utn.dds.k3003.subscribers;
 
+import ar.edu.utn.dds.k3003.bll.operacion.*;
 import ar.edu.utn.dds.k3003.exceptions.NonTransientException;
-import ar.edu.utn.dds.k3003.bll.operacion.DeleteHandler;
-import ar.edu.utn.dds.k3003.bll.operacion.OperacionEnum;
-import ar.edu.utn.dds.k3003.bll.operacion.PdiHandler;
-import ar.edu.utn.dds.k3003.bll.operacion.UpsertHandler;
 import com.rabbitmq.client.Channel;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -16,14 +13,26 @@ import java.nio.charset.StandardCharsets;
 @Component
 public class HechosUpdatesSubscriber {
 
-    private final DeleteHandler deleteHandler;
-    private final PdiHandler pdiHandler;
     private final UpsertHandler upsertHandler;
+    private final DeleteHandler deleteHandler;
+    private final DeleteAllHandler deleteAllHandler;
+    private final PdiUpsertHandler pdiUpsertHandler;
+    private final PdiDeleteHandler pdiDeleteHandler;
+    private final PdiDeleteAllHandler pdiDeleteAllHandler;
 
-    public HechosUpdatesSubscriber(DeleteHandler deleteHandler, PdiHandler pdiHandler, UpsertHandler upsertHandler) {
-        this.deleteHandler = deleteHandler;
-        this.pdiHandler = pdiHandler;
+    public HechosUpdatesSubscriber(
+            UpsertHandler upsertHandler,
+            DeleteHandler deleteHandler,
+            DeleteAllHandler deleteAllHandler,
+            PdiUpsertHandler pdiUpsertHandler,
+            PdiDeleteHandler pdiDeleteHandler,
+            PdiDeleteAllHandler pdiDeleteAllHandler) {
         this.upsertHandler = upsertHandler;
+        this.deleteHandler = deleteHandler;
+        this.deleteAllHandler = deleteAllHandler;
+        this.pdiUpsertHandler = pdiUpsertHandler;
+        this.pdiDeleteHandler = pdiDeleteHandler;
+        this.pdiDeleteAllHandler = pdiDeleteAllHandler;
     }
 
     @RabbitListener(queues = "${app.hechos.updates.queue}")
@@ -39,9 +48,12 @@ public class HechosUpdatesSubscriber {
             var msgString = toString(msg);
 
             switch (operacion) {
-                case UPSERT -> this.upsertHandler.handle(msgString);
-                case PDI    -> this.pdiHandler.handle(msgString);
-                case DELETE -> this.deleteHandler.handle(msgString);
+                case UPSERT         -> this.upsertHandler.handle(msgString);
+                case DELETE         -> this.deleteHandler.handle(msgString);
+                case DELETEALL      -> this.deleteAllHandler.handle(msgString);
+                case PDIUPSERT      -> this.pdiUpsertHandler.handle(msgString);
+                case PDIDELETE      -> this.pdiDeleteHandler.handle(msgString);
+                case PDIDELETEALL   -> this.pdiDeleteAllHandler.handle(msgString);
             }
 
             ch.basicAck(tag, false);
