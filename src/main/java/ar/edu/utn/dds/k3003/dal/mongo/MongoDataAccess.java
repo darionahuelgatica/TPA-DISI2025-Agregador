@@ -45,6 +45,10 @@ public class MongoDataAccess {
         mongoTemplate.upsert(q, u, HechoDoc.class, this.collection);
     }
 
+    public void deleteAll() {
+        mongoTemplate.remove(new Query(), HechoDoc.class, this.collection);
+    }
+
     @Nullable
     public HechoDoc findById(String id){
         Query q = new Query(Criteria.where("_id").is(id));
@@ -90,5 +94,10 @@ public class MongoDataAccess {
         if (result.getModifiedCount() == 0) {
             System.out.println("No se eliminó ningún PDI. Puede que no exista: " + pdiId);
         }
+    }
+
+    public void deleteAllPdi(){
+        Update update = new Update().unset("pdis");
+        mongoTemplate.updateMulti(new Query(), update, this.collection);
     }
 }
