@@ -28,7 +28,7 @@ public class UpsertHandler implements IHandler {
         JsonNode root = toJsonNode(mensaje, objectMapper, OperacionEnum.UPSERT);
 
         String hechoId = getFromJsonNode(root, "hechoId");
-        String fuenteId = getFromJsonNode(root, "hechoId");
+        String fuenteId = getFromJsonNode(root, "fuenteId");
 
         String id = fuenteId + ":" + hechoId;
         doc.set_id(id);
