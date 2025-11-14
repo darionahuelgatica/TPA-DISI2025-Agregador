@@ -9,7 +9,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-@Document
+@Document("HECHOS")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class HechoDoc {
 

@@ -21,11 +21,13 @@ public class HechoDTO {
     private LocalDateTime fecha;
 
     public static HechoDTO fromDoc(HechoDoc d) {
+        var fecha = d.getCreatedAt() != null ? d.getCreatedAt().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime() : null;
+
         return new HechoDTO(
             d.getHechoId(),
             d.getNombreColeccion(),
             d.getTitulo(),
-            d.getCreatedAt().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime()
+            fecha
         );
     }
 }

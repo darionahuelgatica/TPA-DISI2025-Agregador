@@ -41,8 +41,6 @@ public class HechoService {
 
         if (hasText)
             dataQ.with(Sort.by(Sort.Direction.DESC, "updatedAt"));
-        else
-            dataQ.with(Sort.by(Sort.Direction.DESC, "updatedAt"));
 
         dataQ.with(pageable);
 
