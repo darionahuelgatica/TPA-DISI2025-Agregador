@@ -2,12 +2,7 @@ package ar.edu.utn.dds.k3003.bll.services;
 
 import ar.edu.utn.dds.k3003.dal.mongo.HechoDoc;
 import ar.edu.utn.dds.k3003.dto.HechoDTO;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -24,24 +19,22 @@ public class HechoService {
 
     private final MongoTemplate mongo;
 
-    @Autowired
     public HechoService(MongoTemplate mongo) {
         this.mongo = mongo;
     }
 
     public Page<HechoDTO> search(String text, String tagsCsv, int skip, int limit) {
+
         boolean hasText = text != null && !text.isBlank();
         List<String> tags = parseCsv(tagsCsv);
 
         if (limit <= 0) limit = 10;
-        int page = Math.max(0, skip / limit);
+        if (skip < 0)  skip = 0;
+        int page = skip / limit;
         Pageable pageable = PageRequest.of(page, limit);
 
         Query dataQ = buildQuery(hasText, text, tags);
-
-        if (hasText)
-            dataQ.with(Sort.by(Sort.Direction.DESC, "updatedAt"));
-
+        dataQ.with(Sort.by(Sort.Direction.DESC, "updatedAt"));
         dataQ.with(pageable);
 
         List<HechoDTO> content = mongo.find(dataQ, HechoDoc.class)
@@ -59,8 +52,9 @@ public class HechoService {
         Query q;
 
         if (hasText) {
+            // $text: { $search: text }
             TextCriteria tc = TextCriteria.forDefaultLanguage().matching(text);
-            q = TextQuery.queryText(tc); // sin sort ni paginación acá
+            q = TextQuery.queryText(tc);
         } else {
             q = new Query();
         }
@@ -70,7 +64,6 @@ public class HechoService {
         }
 
         q.addCriteria(Criteria.where("eliminado").is(false));
-
         return q;
     }
 
@@ -85,10 +78,10 @@ public class HechoService {
     private static List<String> parseCsv(String csv) {
         if (csv == null || csv.isBlank()) return List.of();
         return Arrays.stream(csv.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isBlank())
-                .map(String::toLowerCase)
-                .distinct()
-                .collect(Collectors.toList());
+            .map(String::trim)
+            .filter(s -> !s.isBlank())
+            .map(String::toLowerCase)
+            .distinct()
+            .collect(Collectors.toList());
     }
 }
