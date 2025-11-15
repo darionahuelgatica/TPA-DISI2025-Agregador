@@ -39,7 +39,7 @@ public class MongoDataAccess {
     public void delete(String hechoDocId) {
         Query q = new Query(Criteria.where("_id").is(hechoDocId));
         Update u = new Update().set("eliminado", true).set("updatedAt", Instant.now());
-        mongoTemplate.upsert(q, u, HechoDoc.class, this.collection);
+        mongoTemplate.remove(q, HechoDoc.class, this.collection);
     }
 
     public void deleteAll() {
