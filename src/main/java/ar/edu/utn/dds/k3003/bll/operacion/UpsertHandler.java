@@ -38,15 +38,6 @@ public class UpsertHandler implements IHandler {
         setFromJsonNodeIfNotNull(doc, HechoDoc::setTitulo, root, "titulo");
         setFromJsonNodeIfNotNull(doc, HechoDoc::setNombreColeccion, root, "nombreColeccion");
 
-        JsonNode eliminado = root.get("eliminado");
-        doc.setEliminado(eliminado != null && eliminado.asBoolean(false));
-
-        Instant now = Instant.now();
-        doc.setUpdatedAt(now);
-        if (doc.getCreatedAt() == null) {
-            doc.setCreatedAt(now);
-        }
-
         this.mongoDataAccess.upsert(doc);
     }
 }

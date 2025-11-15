@@ -29,10 +29,7 @@ public class MongoDataAccess {
             .set("hechoId", doc.getHechoId())
             .set("fuenteId", doc.getFuenteId())
             .set("nombreColeccion", doc.getNombreColeccion())
-            .set("titulo", doc.getTitulo())
-            .set("eliminado", doc.isEliminado())
-            .set("updatedAt", doc.getUpdatedAt())
-            .setOnInsert("createdAt", doc.getCreatedAt());
+            .set("titulo", doc.getTitulo());
         var result = mongoTemplate.updateFirst(q, u, HechoDoc.class, this.collection);
         if (result.getMatchedCount() == 0) {
             mongoTemplate.insert(doc, this.collection);

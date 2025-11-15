@@ -5,7 +5,6 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.*;
-import org.springframework.data.domain.Sort;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -21,13 +20,12 @@ public class HechosIndexConfig {
         var text = new TextIndexDefinition.TextIndexDefinitionBuilder()
                 .onField("titulo", 10F)
                 .onField("nombreColeccion")
-                .onField("fuenteId")
                 .onField("hechoId")
-                .onField("pdis.descripcion")
+                //.onField("pdis.descripcion")
                 .build();
         ops.ensureIndex(text);
 
-        ops.ensureIndex(new Index()
-                .on("pdis.etiquetas", Sort.Direction.ASC)); // multikey
+        //ops.ensureIndex(new Index()
+                //.on("pdis.etiquetas", Sort.Direction.ASC)); // multikey
     }
 }

@@ -2,6 +2,7 @@ package ar.edu.utn.dds.k3003.bll.services;
 
 import ar.edu.utn.dds.k3003.dal.mongo.HechoDoc;
 import ar.edu.utn.dds.k3003.dto.HechoDTO;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -18,52 +19,50 @@ import java.util.stream.Collectors;
 public class HechoService {
 
     private final MongoTemplate mongo;
+    @Value("${app.mongo.collection}")
+    private String hechosCol;
 
     public HechoService(MongoTemplate mongo) {
         this.mongo = mongo;
     }
 
-    public Page<HechoDTO> search(String text, String tagsCsv, int skip, int limit) {
-
+    public Page<HechoDTO> search(String text, String tagsCsv, int page, int size) {
         boolean hasText = text != null && !text.isBlank();
         List<String> tags = parseCsv(tagsCsv);
 
-        if (limit <= 0) limit = 10;
-        if (skip < 0)  skip = 0;
-        int page = skip / limit;
-        Pageable pageable = PageRequest.of(page, limit);
+        if (page < 0)  page = 0;
+        if (size <= 0) size = 5;
 
-        Query dataQ = buildQuery(hasText, text, tags);
-        dataQ.with(Sort.by(Sort.Direction.DESC, "updatedAt"));
-        dataQ.with(pageable);
+        Query baseQ = buildQuery(hasText, text, tags);
 
-        List<HechoDTO> content = mongo.find(dataQ, HechoDoc.class)
-                .stream()
-                .map(HechoDTO::fromDoc)
-                .toList();
+        long total = mongo.count(baseQ, HechoDoc.class, this.hechosCol);
 
-        Query countQ = buildQuery(hasText, text, tags);
-        long total = mongo.count(countQ, HechoDoc.class);
+        if (hasText && baseQ instanceof org.springframework.data.mongodb.core.query.TextQuery) {
+            ((org.springframework.data.mongodb.core.query.TextQuery) baseQ).sortByScore();
+        } else {
+            baseQ.with(Sort.by(Sort.Direction.ASC, "id"));
+        }
+        baseQ.with(PageRequest.of(page, size));
 
-        return new PageImpl<>(content, pageable, total);
+        List<HechoDTO> content = mongo.find(baseQ, HechoDoc.class, this.hechosCol)
+                .stream().map(HechoDTO::fromDoc).toList();
+
+        return new PageImpl<>(content, PageRequest.of(page, size), total);
     }
 
     private Query buildQuery(boolean hasText, String text, List<String> tags) {
-        Query q;
+        Query q = new Query();
 
         if (hasText) {
             // $text: { $search: text }
             TextCriteria tc = TextCriteria.forDefaultLanguage().matching(text);
             q = TextQuery.queryText(tc);
-        } else {
-            q = new Query();
         }
 
         if (tags != null && !tags.isEmpty()) {
             q.addCriteria(criteriaTagsAND(tags));
         }
 
-        q.addCriteria(Criteria.where("eliminado").is(false));
         return q;
     }
 
