@@ -4,12 +4,12 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.index.TextIndexed;
+import org.springframework.data.mongodb.core.mapping.TextScore;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-@Document("HECHOS")
+@Document
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class HechoDoc {
 
@@ -17,16 +17,15 @@ public class HechoDoc {
     private String _id;
 
     private String fuenteId;
+    @TextIndexed
     private String hechoId;
+    @TextIndexed
     private String nombreColeccion;
-
     @TextIndexed(weight = 10)
     private String titulo;
 
-    private boolean eliminado;
-
-    private Instant createdAt;
-    private Instant updatedAt;
+    @TextScore
+    private Float score;
 
     @Builder.Default
     private List<PdiDoc> pdis = new ArrayList<>();

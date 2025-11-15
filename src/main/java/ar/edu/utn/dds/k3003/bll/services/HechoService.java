@@ -11,7 +11,9 @@ import org.springframework.data.mongodb.core.query.TextCriteria;
 import org.springframework.data.mongodb.core.query.TextQuery;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,21 +35,45 @@ public class HechoService {
         if (page < 0)  page = 0;
         if (size <= 0) size = 5;
 
-        Query baseQ = buildQuery(hasText, text, tags);
+        Query filterQ = buildQuery(hasText, text, tags);
 
-        long total = mongo.count(baseQ, HechoDoc.class, this.hechosCol);
+        List<String> distinctIds = mongo.findDistinct(filterQ, "hechoId", HechoDoc.class, String.class);
+        long totalDistinct = distinctIds.size();
 
-        if (hasText && baseQ instanceof org.springframework.data.mongodb.core.query.TextQuery) {
-            ((org.springframework.data.mongodb.core.query.TextQuery) baseQ).sortByScore();
-        } else {
-            baseQ.with(Sort.by(Sort.Direction.ASC, "id"));
+        final int need = (page + 1) * size;
+        final int batch = Math.max(50, size * 4);
+        int fetched = 0;
+
+        LinkedHashMap<String, HechoDoc> uniques = new LinkedHashMap<>();
+
+        while (uniques.size() < need) {
+            Query scanQ = buildQuery(hasText, text, tags);
+
+            if (hasText && scanQ instanceof TextQuery tq) {
+                tq.sortByScore();
+            } else {
+                scanQ.with(Sort.by(Sort.Direction.ASC, "id"));
+            }
+
+            scanQ.skip(fetched).limit(batch);
+
+            List<HechoDoc> chunk = mongo.find(scanQ, HechoDoc.class, this.hechosCol);
+            if (chunk.isEmpty()) break;
+
+            for (HechoDoc d : chunk) {
+                uniques.putIfAbsent(d.getHechoId(), d);
+                if (uniques.size() >= need) break;
+            }
+            fetched += chunk.size();
         }
-        baseQ.with(PageRequest.of(page, size));
 
-        List<HechoDTO> content = mongo.find(baseQ, HechoDoc.class, this.hechosCol)
-                .stream().map(HechoDTO::fromDoc).toList();
+        List<HechoDTO> content = uniques.values().stream()
+                .skip((long) page * size)
+                .limit(size)
+                .map(HechoDTO::fromDoc)
+                .toList();
 
-        return new PageImpl<>(content, PageRequest.of(page, size), total);
+        return new PageImpl<>(content, PageRequest.of(page, size), totalDistinct);
     }
 
     private Query buildQuery(boolean hasText, String text, List<String> tags) {
