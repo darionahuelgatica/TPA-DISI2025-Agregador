@@ -27,8 +27,10 @@ public class BusquedaController {
             @RequestParam(name="text", defaultValue="") String text,
             @RequestParam(name="tags", defaultValue="") String tags,
             @RequestParam(name="page", defaultValue="0") int page,
-            @RequestParam(name="size", defaultValue="20") int size) {
-        meterRegistry.counter("agregador.busquedaFullText").increment();
-        return service.search(text, tags, page, size);
+            @RequestParam(name="size", defaultValue="3") int size) {
+        meterRegistry.counter("agregador.busquedaFullText.total").increment();
+
+        return meterRegistry.timer("agregador.busquedaFullText.tiempo")
+                .record(() -> service.search(text, tags, page, size));
     }
 }
